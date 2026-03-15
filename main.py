@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import time
 from itertools import combinations
 from collections import Counter
 
@@ -15,6 +14,9 @@ from plots.basket_distribution import plot_basket_distribution
 from plots.payment_distribution import clean_tax_column, plot_payment_distribution
 from plots.tax_distribution import plot_tax_distribution
 from plots.payment_heatmap import plot_payment_time_heatmap
+
+from print.combination_report import get_top_item_combinations, print_combination_report
+from print.time_window import analyze_time_window, print_time_window_report
 
 # %%
 
@@ -47,7 +49,6 @@ fig_heat = plot_revenue_heatmap(df)
 fig_dist = plot_weekday_distribution(df)
 # fig_dist.savefig('output/weekday_variance.png', dpi=300)
 
-
 fig_month = plot_monthly_revenue(df)
 # fig_month.savefig('output/monthly_trend.pdf')
 
@@ -66,47 +67,13 @@ fig_pay_time = plot_payment_time_heatmap(df)
 plt.show()
 
 
+# %% prints
 
+top_pairs = get_top_item_combinations(df, top_n=10)
+print_combination_report(top_pairs)
 
-# %%
-
-basket = df.groupby('BelegID (intern)')['Artikel'].apply(list)
-count = Counter()
-
-for row in basket:
-    row_sorted = sorted([str(x) for x in row if str(x) != 'nan']) 
-    if len(row_sorted) < 2:
-        continue
-    count.update(combinations(row_sorted, 2))
-
-print("--- TOP 10 KOMBINATIONEN (Was wird zusammen gekauft?) ---")
-for key, value in count.most_common(10):
-    print(f"{key[0]} + {key[1]}: {value} mal zusammen verkauft")
-
-
-# %%
-
-df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
-start_zeit = time(20, 45) # 20:30 Uhr
-end_zeit = time(21, 00)   # 21:30 Uhr
-maske = (df['Belegdatum'].dt.time >= start_zeit) & (df['Belegdatum'].dt.time <= end_zeit)
-gefilterte_daten = df.loc[maske]
-
-if gefilterte_daten['Bruttobetrag'].dtype == object:
-    gefilterte_daten['Bruttobetrag'] = (
-        gefilterte_daten['Bruttobetrag']
-        .astype(str)
-        .str.replace(',', '.')
-        .astype(float)
-    )
-
-umsatz_zeitraum = gefilterte_daten['Bruttobetrag'].sum()
-umsatz_zeitraum_durchschnitt = gefilterte_daten['Bruttobetrag'].mean()
-
-print(f"Anzahl Belege zwischen {start_zeit} und {end_zeit}: {len(gefilterte_daten)}")
-print(f"Gesamtumsatz in diesem Zeitraum: {umsatz_zeitraum:.2f} €")
-print(f"Durchschnitt in diesem Zeitraum: {umsatz_zeitraum_durchschnitt:.2f} €")
-
+closing_stats = analyze_time_window(df, start_h=20, start_m=45, end_h=21, end_m=0)
+print_time_window_report(closing_stats)
 
 # %%
 
