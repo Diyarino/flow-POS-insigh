@@ -36,7 +36,7 @@ The current version of the script performs several key analyses:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/your-username/flowpos-insight.git
+git clone https://github.com/diyaino/flowpos-insight.git
 cd flowpos-insight
 
 ```
