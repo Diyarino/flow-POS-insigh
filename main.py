@@ -9,6 +9,7 @@ from utils.config_plots import configure_plt
 from plots.daily_revenue import plot_daily_revenue
 from plots.top_products import plot_top_products
 from plots.revenue_heatmap import plot_revenue_heatmap
+from plots.weekday_distribution import plot_weekday_distribution
 
 # %%
 
@@ -20,6 +21,7 @@ file_path = '/media/diyar/3387c237-bd78-4cd3-adc5-e25c4ce87fa4/datasets/cash_reg
 
 df = pd.read_excel(file_path)
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
+df['Monat_Zahl'] = df['Belegdatum'].dt.month
 df['Datum_Tag'] = df['Belegdatum'].dt.date
 
 # %% plots
@@ -36,7 +38,8 @@ fig_prod = plot_top_products(df, top_n=10)
 fig_heat = plot_revenue_heatmap(df)
 # fig_heat.savefig('output/revenue_heatmap.pdf')
 
-
+fig_dist = plot_weekday_distribution(df)
+# fig_dist.savefig('output/weekday_variance.png', dpi=300)
 
 plt.show()
 
@@ -44,19 +47,7 @@ plt.show()
 # %%
 
 # Datum konvertieren
-df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
-df['Monat_Zahl'] = df['Belegdatum'].dt.month
-df['Datum_Tag'] = df['Belegdatum'].dt.date
 
-wochentage_order = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-tagesumsatz = df.groupby(['Datum_Tag', 'Wochentag'])['Bruttobetrag'].sum().reset_index()
-
-plt.figure(figsize=(7, 3))
-sns.boxplot(x='Wochentag', y='Bruttobetrag', data=tagesumsatz, order=wochentage_order, hue='Wochentag', palette="Set3", legend=False)
-plt.title('Risiko-Analyse: Wie stark schwankt der Umsatz pro Wochentag?')
-plt.ylabel('Tagesumsatz (€)')
-plt.grid(True, axis='y', linestyle='--', alpha=0.5)
-plt.show()
 
 # %%
 
