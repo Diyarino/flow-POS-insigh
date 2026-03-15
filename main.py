@@ -12,8 +12,8 @@ from plots.revenue_heatmap import plot_revenue_heatmap
 from plots.weekday_distribution import plot_weekday_distribution
 from plots.monthly_revenue import plot_monthly_revenue
 from plots.basket_distribution import plot_basket_distribution
-from payment_analysis import clean_tax_column, plot_payment_distribution
-
+from plots.payment_distribution import clean_tax_column, plot_payment_distribution
+from plots.tax_distribution import plot_tax_distribution
 
 # %%
 
@@ -56,35 +56,12 @@ fig_basket = plot_basket_distribution(df, limit=50.0)
 fig_payment = plot_payment_distribution(df)
 # fig_payment.savefig('output/payment_methods.pdf')
 
-plt.show()
-
-
-
-
-#%%
-
-# --- ANALYSE 2: Im Haus (19%) vs. Außer Haus (7%) ---
-steuer_verteilung = df.groupby('Steuersatz_Clean')['Menge'].sum()
-labels = []
-for steuer in steuer_verteilung.index:
-    if steuer == 7.0:
-        labels.append('7% (Meist Speisen / Außer Haus)')
-    elif steuer == 19.0:
-        labels.append('19% (Getränke / Im Haus)')
-    else:
-        labels.append(f'{steuer}% (Sonstiges)')
-
-plt.figure(figsize=(8, 3))
-sns.barplot(x=labels, y=steuer_verteilung.values, hue=labels, palette='pastel', legend=False)
-plt.title('Verkaufte Menge nach Steuersatz')
-plt.ylabel('Anzahl verkaufte Artikel')
-plt.xlabel('Steuersatz / Typ')
-
-# Werte über die Balken schreiben
-for i, v in enumerate(steuer_verteilung.values):
-    plt.text(i, v, str(int(v)), ha='center', va='bottom', fontweight='bold')
+fig_tax = plot_tax_distribution(df)
+# fig_tax.savefig('output/tax_distribution.pdf')
 
 plt.show()
+
+
 
 # %%
 
