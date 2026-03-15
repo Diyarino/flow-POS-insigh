@@ -10,6 +10,7 @@ from plots.daily_revenue import plot_daily_revenue
 from plots.top_products import plot_top_products
 from plots.revenue_heatmap import plot_revenue_heatmap
 from plots.weekday_distribution import plot_weekday_distribution
+from plots.monthly_revenue import plot_monthly_revenue
 
 # %%
 
@@ -41,33 +42,16 @@ fig_heat = plot_revenue_heatmap(df)
 fig_dist = plot_weekday_distribution(df)
 # fig_dist.savefig('output/weekday_variance.png', dpi=300)
 
-plt.show()
 
-
-# %%
-
-# Datum konvertieren
-
-
-# %%
-
-# --- ANALYSE 2: Monatsverlauf (Der "schwierigste" Monat) ---
-monatsumsatz = df.groupby('Monat_Zahl')['Bruttobetrag'].sum()
-
-plt.figure(figsize=(6, 3))
-bars = plt.bar(monatsumsatz.index, monatsumsatz.values, color='#e74c3c')
-plt.title('Jahresverlauf: Gesamtumsatz pro Monat')
-plt.xlabel('Monat (1=Januar, 12=Dezember)')
-plt.ylabel('Gesamtumsatz (€)')
-plt.xticks(range(1, 13)) # Zeigt Zahlen 1 bis 12 an
-plt.grid(axis='y', alpha=0.3)
-
-# Kleines Extra: Den Umsatz über den Balken schreiben
-for bar in bars:
-    yval = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width()/2, yval, f'{int(yval)}€', ha='center', va='bottom', fontsize=8)
+fig_month = plot_monthly_revenue(df)
+# fig_month.savefig('output/monthly_trend.pdf')
 
 plt.show()
+
+
+
+
+
 
 # %%
 
