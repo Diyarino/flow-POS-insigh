@@ -7,6 +7,7 @@ from itertools import combinations
 from collections import Counter
 
 from utils.config_plots import configure_plt
+from plots.daily_revenue import plot_daily_revenue
 
 # %%
 
@@ -22,17 +23,8 @@ df['Datum_Tag'] = df['Belegdatum'].dt.date
 
 # %%
 
-# --- ANALYSE 1: Umsatzverlauf pro Tag ---
-tagesumsatz = df.groupby('Datum_Tag')['Bruttobetrag'].sum()
-
-plt.figure(figsize=(6, 3))
-plt.plot(tagesumsatz.index, tagesumsatz.values, marker='o', linestyle='-', color='#1f77b4', lw=1, markersize=3)
-plt.title('Täglicher Umsatzverlauf')
-plt.xlabel('Datum')
-plt.ylabel('Umsatz (€)')
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d.%m')) # Datum schön formatieren
-plt.grid(True)
-plt.tight_layout()
+fig_revenue = plot_daily_revenue(df)
+# fig_revenue.savefig('daily_revenue_report.pdf', dpi=300)
 plt.show()
 
 # %%
