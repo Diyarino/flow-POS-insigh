@@ -8,6 +8,7 @@ from collections import Counter
 from utils.config_plots import configure_plt
 from plots.daily_revenue import plot_daily_revenue
 from plots.top_products import plot_top_products
+from plots.revenue_heatmap import plot_revenue_heatmap
 
 # %%
 
@@ -21,7 +22,7 @@ df = pd.read_excel(file_path)
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Datum_Tag'] = df['Belegdatum'].dt.date
 
-# %% daily_revenue_report
+# %% plots
 
 # --- Run Daily Revenue Analysis ---
 fig_rev = plot_daily_revenue(df)
@@ -31,31 +32,17 @@ fig_rev = plot_daily_revenue(df)
 fig_prod = plot_top_products(df, top_n=10)
 # fig_prod.savefig('output/top_products.png', dpi=300)
 
-
-
+# --- Run Heatmap Analysis ---
+fig_heat = plot_revenue_heatmap(df)
+# fig_heat.savefig('output/revenue_heatmap.pdf')
 
 
 
 plt.show()
 
-# %%
-
-# --- ANALYSE 3: Heatmap der Stoßzeiten (Wochentag vs. Stunde) ---
-wochentage_order = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-pivot_data = df.pivot_table(index='Stunde', columns='Wochentag', values='Bruttobetrag', aggfunc='sum')
-
-pivot_data = pivot_data.reindex(columns=[d for d in wochentage_order if d in pivot_data.columns])
-
-plt.figure(figsize=(6, 6))
-sns.heatmap(pivot_data, cmap='coolwarm', annot=False, linewidths=.5)
-plt.title('Umsatz-Heatmap: Wann machen wir den meisten Umsatz?')
-plt.ylabel('Uhrzeit (Stunde)')
-plt.xlabel('Wochentag')
-plt.tight_layout()
-plt.show()
-
 
 # %%
+
 # Datum konvertieren
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Monat_Zahl'] = df['Belegdatum'].dt.month
