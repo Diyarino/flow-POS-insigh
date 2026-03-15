@@ -1,13 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import matplotlib.dates as mdates
 from datetime import time
 from itertools import combinations
 from collections import Counter
 
 from utils.config_plots import configure_plt
 from plots.daily_revenue import plot_daily_revenue
+from plots.top_products import plot_top_products
 
 # %%
 
@@ -21,23 +21,21 @@ df = pd.read_excel(file_path)
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Datum_Tag'] = df['Belegdatum'].dt.date
 
-# %%
+# %% daily_revenue_report
 
-fig_revenue = plot_daily_revenue(df)
-# fig_revenue.savefig('daily_revenue_report.pdf', dpi=300)
-plt.show()
+# --- Run Daily Revenue Analysis ---
+fig_rev = plot_daily_revenue(df)
+# fig_rev.savefig('output/daily_revenue.pdf')
 
-# %%
+# --- Run Product Analysis ---
+fig_prod = plot_top_products(df, top_n=10)
+# fig_prod.savefig('output/top_products.png', dpi=300)
 
-# --- ANALYSE 2: Top 10 Verkaufte Produkte ---
-top_produkte = df.groupby('Artikel')['Menge'].sum().sort_values(ascending=False).head(10)
 
-plt.figure(figsize=(6, 3))
-sns.barplot(x=top_produkte.values, y=top_produkte.index, hue=top_produkte.index, palette='viridis', legend=False)
-plt.title('Top 10 Bestseller (nach Menge)')
-plt.xlabel('Verkaufte Anzahl')
-plt.grid()
-plt.tight_layout() # Verhindert, dass lange Namen abgeschnitten werden
+
+
+
+
 plt.show()
 
 # %%
