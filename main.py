@@ -11,6 +11,7 @@ from plots.top_products import plot_top_products
 from plots.revenue_heatmap import plot_revenue_heatmap
 from plots.weekday_distribution import plot_weekday_distribution
 from plots.monthly_revenue import plot_monthly_revenue
+from plots.basket_distribution import plot_basket_distribution
 
 # %%
 
@@ -46,29 +47,12 @@ fig_dist = plot_weekday_distribution(df)
 fig_month = plot_monthly_revenue(df)
 # fig_month.savefig('output/monthly_trend.pdf')
 
+fig_basket = plot_basket_distribution(df, limit=50.0)
+# fig_basket.savefig('output/basket_distribution.png', dpi=300)
+
 plt.show()
 
 
-
-
-
-
-# %%
-
-# --- ANALYSE 3: Durchschnittlicher Bon (Warenkorbwert) ---
-bon_werte = df.groupby('Belegnummer')['Bruttobetrag'].sum()
-bon_werte_normal = bon_werte[bon_werte < 50] 
-
-plt.figure(figsize=(6, 3))
-sns.histplot(bon_werte_normal, bins=20, kde=True, color='green')
-plt.title('Wie viel gibt ein Kunde durchschnittlich aus? (Verteilung)')
-plt.xlabel('Rechnungsbetrag (€)')
-plt.ylabel('Anzahl der Bestellungen')
-plt.xlim(0,50)
-plt.grid()
-plt.axvline(bon_werte.mean(), color='red', linestyle='--', label=f'Durchschnitt: {bon_werte.mean():.2f}€')
-plt.legend()
-plt.show()
 
 
 
