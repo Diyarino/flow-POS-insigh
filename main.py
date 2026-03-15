@@ -14,6 +14,7 @@ from plots.monthly_revenue import plot_monthly_revenue
 from plots.basket_distribution import plot_basket_distribution
 from plots.payment_distribution import clean_tax_column, plot_payment_distribution
 from plots.tax_distribution import plot_tax_distribution
+from plots.payment_heatmap import plot_payment_time_heatmap
 
 # %%
 
@@ -59,20 +60,13 @@ fig_payment = plot_payment_distribution(df)
 fig_tax = plot_tax_distribution(df)
 # fig_tax.savefig('output/tax_distribution.pdf')
 
+fig_pay_time = plot_payment_time_heatmap(df)
+# fig_pay_time.savefig('output/payment_time_analysis.png', dpi=300)
+
 plt.show()
 
 
 
-# %%
-
-heatmap_data = pd.crosstab(df['Stunde'], df['Zahlart'])
-
-plt.figure(figsize=(6, 5))
-sns.heatmap(heatmap_data, cmap="YlGnBu", annot=True, fmt='d') # fmt='d' heißt ganze Zahlen (keine Kommas)
-plt.title('Wann wird welche Zahlart genutzt? (Anzahl Belege)')
-plt.ylabel('Uhrzeit')
-plt.xlabel('Zahlart')
-plt.show()
 
 # %%
 
