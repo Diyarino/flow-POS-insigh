@@ -5,35 +5,22 @@ import matplotlib.dates as mdates
 from datetime import time
 from itertools import combinations
 from collections import Counter
-import shutil
+
+from utils.config_plots import configure_plt
 
 # %%
-
-def configure_plt(check_latex=True):
-    if check_latex and shutil.which('latex'):
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='Times New Roman')
-    else:
-        plt.rc('text', usetex=False)
-        plt.rc('font', family='serif')
-    
-    plt.rcParams.update({'figure.max_open_warning': 0})
-    plt.rc('font', size=12)
-    plt.rc('axes', titlesize=14)
-    plt.rc('axes', labelsize=12)
 
 configure_plt()
 
-# 1. Datei laden
+# %% 1. Datei laden
+
 file_path = '/media/diyar/3387c237-bd78-4cd3-adc5-e25c4ce87fa4/datasets/cash_register_system/raw/Einzelumsätze_2026-02-17_14-50-03.xlsx'
+
 df = pd.read_excel(file_path)
-
-
-# %%
-
-# --- DATEN BEREINIGEN ---
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Datum_Tag'] = df['Belegdatum'].dt.date
+
+# %%
 
 # --- ANALYSE 1: Umsatzverlauf pro Tag ---
 tagesumsatz = df.groupby('Datum_Tag')['Bruttobetrag'].sum()
