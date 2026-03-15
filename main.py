@@ -12,6 +12,8 @@ from plots.revenue_heatmap import plot_revenue_heatmap
 from plots.weekday_distribution import plot_weekday_distribution
 from plots.monthly_revenue import plot_monthly_revenue
 from plots.basket_distribution import plot_basket_distribution
+from payment_analysis import clean_tax_column, plot_payment_distribution
+
 
 # %%
 
@@ -25,6 +27,7 @@ df = pd.read_excel(file_path)
 df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Monat_Zahl'] = df['Belegdatum'].dt.month
 df['Datum_Tag'] = df['Belegdatum'].dt.date
+df['Steuersatz_Clean'] = clean_tax_column(df)
 
 # %% plots
 
@@ -50,30 +53,13 @@ fig_month = plot_monthly_revenue(df)
 fig_basket = plot_basket_distribution(df, limit=50.0)
 # fig_basket.savefig('output/basket_distribution.png', dpi=300)
 
+fig_payment = plot_payment_distribution(df)
+# fig_payment.savefig('output/payment_methods.pdf')
+
 plt.show()
 
 
 
-
-
-# %%
-
-# Datenbereinigung (Sicherstellen, dass Zahlen auch Zahlen sind)
-df['Steuersatz_Clean'] = (
-    df['Steuersatz']
-    .astype(str)
-    .str.replace('%', '')
-    .str.replace('\xa0', '')
-    .str.replace(' ', '')
-    .str.replace(',', '.')
-    .astype(float)
-)
-zahlart_umsatz = df.groupby('Zahlart')['Bruttobetrag'].sum()
-
-plt.figure(figsize=(4, 4))
-plt.pie(zahlart_umsatz, labels=zahlart_umsatz.index, autopct='%1.1f%%', startangle=140, colors=['#ff9999','#66b3ff','#99ff99'])
-plt.title('Umsatzanteil nach Zahlungsart (Wo kommt das Geld her?)')
-plt.show()
 
 #%%
 
