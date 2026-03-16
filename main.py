@@ -14,6 +14,7 @@ from plots.basket_distribution import plot_basket_distribution
 from plots.payment_distribution import clean_tax_column, plot_payment_distribution
 from plots.tax_distribution import plot_tax_distribution
 from plots.payment_heatmap import plot_payment_time_heatmap
+from plots.highlights import plot_monthly_top_combinations
 
 from print.combination_report import get_top_item_combinations, print_combination_report
 from print.time_window import analyze_time_window, print_time_window_report
@@ -31,6 +32,7 @@ df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
 df['Monat_Zahl'] = df['Belegdatum'].dt.month
 df['Datum_Tag'] = df['Belegdatum'].dt.date
 df['Steuersatz_Clean'] = clean_tax_column(df)
+df['Monat_Name'] = df['Belegdatum'].dt.month_name()
 
 # %% plots
 
@@ -64,6 +66,9 @@ fig_tax = plot_tax_distribution(df)
 fig_pay_time = plot_payment_time_heatmap(df)
 # fig_pay_time.savefig('output/payment_time_analysis.png', dpi=300)
 
+fig_basket = plot_monthly_top_combinations(df, receipt_col='BelegID (intern)', item_col='Artikel')
+# fig_basket.savefig('output/basket_top_analysis.png', dpi=300)
+
 plt.show()
 
 
@@ -74,82 +79,6 @@ print_combination_report(top_pairs)
 
 closing_stats = analyze_time_window(df, start_h=20, start_m=45, end_h=21, end_m=0)
 print_time_window_report(closing_stats)
-
-# %%
-
-df['Belegdatum'] = pd.to_datetime(df['Belegdatum'])
-df['Monat_Name'] = df['Belegdatum'].dt.month_name()
-# df['Monat_Name'] = df['Belegdatum'].dt.month_name(locale='German') # Falls locale Fehler macht, nimm .dt.month_name() für Englisch
-df['Monat_Zahl'] = df['Belegdatum'].dt.month
-
-monats_highlights = []
-
-for monat in range(1, 13):
-    df_monat = df[df['Monat_Zahl'] == monat]
-    
-    if df_monat.empty:
-        continue
-    kassenbons = df_monat.groupby('BelegID (intern)')['Artikel'].apply(list)
-    pair_counter = Counter()
-    for artikel_liste in kassenbons:
-        items = sorted(list(set([str(x) for x in artikel_liste if str(x) != 'nan'])))
-        if len(items) >= 2:
-            pair_counter.update(combinations(items, 2))
-    
-    if pair_counter:
-        top_pair, anzahl = pair_counter.most_common(1)[0]
-        kombi_name = f"{top_pair[0]} + {top_pair[1]}" # Zeilenumbruch für die Grafik
-        monats_name = df_monat['Monat_Name'].iloc[0] # Name des Monats holen
-        
-        monats_highlights.append({
-            'Monat_Zahl': monat,
-            'Monat': monats_name,
-            'Top_Kombi': kombi_name,
-            'Verkäufe': anzahl
-        })
-
-ergebnis_df = pd.DataFrame(monats_highlights).sort_values('Monat_Zahl')
-
-plt.figure(figsize=(8, 4))
-sns.set_style("whitegrid")
-
-plot = sns.barplot(
-    data=ergebnis_df,    # Das 'data=' Argument muss bleiben
-    x='Monat', 
-    y='Verkäufe', 
-    hue='Monat',         # Hier nur den Spaltennamen als Text
-    palette='viridis', 
-    legend=False
-)
-
-# Beschriftungen hinzufügen
-plt.title('Das perfekte Kombi-Angebot für jeden Monat', fontsize=16, fontweight='bold')
-plt.ylabel('Anzahl der gemeinsamen Käufe', fontsize=12)
-plt.xlabel('Monat', fontsize=12)
-plt.xticks(rotation=45) # Monatsnamen schräg stellen, damit sie lesbar sind
-
-# Den Namen der Kombi direkt in/über den Balken schreiben
-for index, row in ergebnis_df.iterrows():
-    x_pos = list(ergebnis_df['Monat']).index(row['Monat'])
-    
-    plt.text(
-        x_pos, 
-        row['Verkäufe'] + 1, # Etwas über dem Balken
-        row['Top_Kombi'], 
-        ha='center', 
-        va='bottom', 
-        fontsize=9, 
-        fontweight='bold',
-        color='black',
-        bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', boxstyle='round,pad=0.2') # Hintergrundbox für Lesbarkeit
-    )
-
-plt.tight_layout()
-plt.show()
-
-# Ausgabe als einfache Tabelle in der Konsole
-print("--- DEINE MONATS-EMPFEHLUNGEN ---")
-print(ergebnis_df[['Monat', 'Top_Kombi', 'Verkäufe']].to_string(index=False))
 
 
 # %%
