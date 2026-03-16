@@ -16,6 +16,7 @@ from plots.tax_distribution import plot_tax_distribution
 from plots.payment_heatmap import plot_payment_time_heatmap
 from plots.highlights import plot_monthly_top_combinations
 
+
 from print.combination_report import get_top_item_combinations, print_combination_report
 from print.time_window import analyze_time_window, print_time_window_report
 
@@ -36,38 +37,40 @@ df['Monat_Name'] = df['Belegdatum'].dt.month_name()
 
 # %% plots
 
-# --- Run Daily Revenue Analysis ---
 fig_rev = plot_daily_revenue(df)
-# fig_rev.savefig('output/daily_revenue.pdf')
+# fig_rev.savefig('output/daily_revenue.png', dpi=300)
 
-# --- Run Product Analysis ---
 fig_prod = plot_top_products(df, top_n=10)
 # fig_prod.savefig('output/top_products.png', dpi=300)
 
-# --- Run Heatmap Analysis ---
 fig_heat = plot_revenue_heatmap(df)
-# fig_heat.savefig('output/revenue_heatmap.pdf')
+# fig_heat.savefig('output/revenue_heatmap.png', dpi=300)
 
 fig_dist = plot_weekday_distribution(df)
 # fig_dist.savefig('output/weekday_variance.png', dpi=300)
 
 fig_month = plot_monthly_revenue(df)
-# fig_month.savefig('output/monthly_trend.pdf')
+# fig_month.savefig('output/monthly_trend.png', dpi=300)
 
 fig_basket = plot_basket_distribution(df, limit=50.0)
 # fig_basket.savefig('output/basket_distribution.png', dpi=300)
 
 fig_payment = plot_payment_distribution(df)
-# fig_payment.savefig('output/payment_methods.pdf')
+# fig_payment.savefig('output/payment_methods.png', dpi=300)
 
 fig_tax = plot_tax_distribution(df)
-# fig_tax.savefig('output/tax_distribution.pdf')
+# fig_tax.savefig('output/tax_distribution.png', dpi=300)
 
 fig_pay_time = plot_payment_time_heatmap(df)
 # fig_pay_time.savefig('output/payment_time_analysis.png', dpi=300)
 
 fig_basket = plot_monthly_top_combinations(df, receipt_col='BelegID (intern)', item_col='Artikel')
 # fig_basket.savefig('output/basket_top_analysis.png', dpi=300)
+
+from hourly_analysis import plot_hourly_product_heatmap
+
+fig_heatmap = plot_hourly_product_heatmap(df)
+# fig_heatmap.savefig('output/heatmap.png', dpi=300)
 
 plt.show()
 
@@ -83,29 +86,6 @@ print_time_window_report(closing_stats)
 
 # %%
 
-df['Stunde'] = pd.to_numeric(df['Stunde'], errors='coerce').fillna(0).astype(int)
-
-df = df[(df['Stunde'] >= 10) & (df['Stunde'] <= 23)]
-
-top_produkte_liste = df.groupby('Artikel')['Menge'].sum().nlargest(15).index
-df_top = df[df['Artikel'].isin(top_produkte_liste)]
-
-pivot_table = df_top.pivot_table(index='Artikel', columns='Stunde', values='Menge', aggfunc='sum')
-
-pivot_table = pivot_table.fillna(0)
-
-pivot_table['Gesamt'] = pivot_table.sum(axis=1)
-pivot_table = pivot_table.sort_values('Gesamt', ascending=False)
-pivot_table = pivot_table.drop(columns='Gesamt') # Hilfsspalte wieder löschen
-
-plt.figure(figsize=(9, 6))
-sns.heatmap(pivot_table, cmap='YlOrRd', linewidths=.5, annot=True, fmt='g')
-
-plt.title('Hitzekarte: Wann wird welches Produkt verkauft?', fontsize=16)
-plt.xlabel('Uhrzeit (Stunde)', fontsize=12)
-
-plt.tight_layout()
-plt.show()
 
 
 # %%
